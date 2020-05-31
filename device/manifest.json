@@ -1,0 +1,31 @@
+{
+	"include": [
+		"$(MODDABLE)/examples/manifest_base.json",
+		"$(MODDABLE)/examples/manifest_net.json",
+		"$(MODDABLE)/examples/manifest_piu.json",
+		"$(MODULES)/network/mdns/manifest.json",
+	],
+	"creation":{
+		"stack":512,
+	},
+	"modules": {
+		"*": [
+			"./main",
+			"$(MODULES)/network/http/*",
+		]
+	},
+	"preload": [
+		"http",
+	],
+	"resources":{
+		"*-alpha": [
+			"$(MODDABLE)/examples/assets/fonts/OpenSans-Regular-20",
+		],
+	},
+	"config": {
+		"sntp": "pool.ntp.org",
+		"buttonLabels": ["KK", "Katie", "Conor"],
+		"endOfDayGMT": 15,
+		"mdnsDomainName": "meetings",
+	},
+}
