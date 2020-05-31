@@ -18,8 +18,14 @@ The Chrome extension is used to collect the meeting schedule from an MS Outlook 
 
 The device software also displays buttons, that when pushed sends a message to the Chrome Extenstion, cause notifications to be displayed on the computer running Chrome.
 
+To use:
+1) [Install extension](https://support.google.com/chrome_webstore/answer/2664769?hl=en)
+1) Open Chrome, and load your Outlook calendar, eg: https://outlook.office.com/calendar
+1) Navigate to the proper day
 
+## Credits
 Moddable is a trademark of []Moddable Tech Inc.](https://www.moddable.com)
+Messager icon image (used in the notification) is from https://www.freeiconspng.com/uploads/message-icon-png-16.png
 
 ## license
 MIT
