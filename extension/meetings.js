@@ -11,8 +11,8 @@ chrome.runtime.onMessage.addListener(
 //let the page load for 10 seconds, then collect data
 setTimeout(() => {
   getMeetings();
-  //refresh every 1 minute. This frequency is primarily so we can also fetch for messages from the remote device
-  setInterval(getMeetings, 1000 * 10);
+  //refresh every 15 seconds. This frequency is primarily so we can also fetch for messages from the remote device
+  setInterval(getMeetings, 1000 * 15);
 }, 10000);
 
 //note, this function can also be called from a message sent by the extension popup

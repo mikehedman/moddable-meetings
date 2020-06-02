@@ -1,6 +1,7 @@
 # Moddable Meetings
 This repository contains the software needed to display an Outlook Calendar on a [Moddable Two](https://www.moddable.com/moddable-two.php) display.
 
+More about the project here: https://www.mikehedman.com/blog/?p=88295740
 ## Components
 ### Device software
 Prerequisite: follow the steps in the [Moddable Two Getting Started Guide](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/moddable-two.md)
@@ -22,6 +23,9 @@ To use:
 1) [Install extension](https://support.google.com/chrome_webstore/answer/2664769?hl=en)
 1) Open Chrome, and load your Outlook calendar, eg: https://outlook.office.com/calendar
 1) Navigate to the proper day
+
+### Mounting
+A 3D printable mount can be found here: https://www.thingiverse.com/thing:4414309
 
 ## Credits
 Moddable is a trademark of []Moddable Tech Inc.](https://www.moddable.com)

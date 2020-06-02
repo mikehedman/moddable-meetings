@@ -189,7 +189,7 @@ class MeetingAppBehavior extends Behavior {
     if ((new Date()).getHours() >= config.endOfDayGMT) {  //15 (gmt) is 8am (PST)
       safeBacklight(100);
     } else {
-      safeBacklight(5);
+      safeBacklight(3);
     }
   }
 
@@ -202,9 +202,7 @@ class MeetingAppBehavior extends Behavior {
     }
 
     this.data.schedule = JSON.parse(meetingData);
-    if (this.data.schedule.length === 0) {
-      return;
-    }
+
     //convert strings into Date objects
     this.data.schedule.map(meeting => {
       meeting.startModdable = new Date(meeting.start);
