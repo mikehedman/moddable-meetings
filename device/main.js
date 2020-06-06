@@ -236,7 +236,8 @@ class MeetingAppBehavior extends Behavior {
 
         case Server.receive:
           self.processMeetingData(application, value);
-          trace(`received JSON: ${value}\n`);
+          // commenting this out, as it's throwing "XS abort: memory full" errors
+          // trace("received JSON: " + value + "\n");
 
           application.time = 0;
           application.start();

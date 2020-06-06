@@ -30,7 +30,7 @@ function setupWebsocket() {
 
   //if not opened in {retryTimeoutSeconds} seconds, close out the WebSocket and try again
   let retryTimeout = setTimeout(() => {
-    webSocket.terminate();
+    webSocket.close();
   }, retryTimeoutSeconds * 1000); // force close unless cleared on 'open'
 
   webSocket.onopen = function() {
