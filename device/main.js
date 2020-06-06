@@ -12,8 +12,7 @@
  *
  */
 import {} from "piu/MC";
-import { Request, Server } from "http";
-import Net from "net";
+import {Server} from "websocket"
 import MDNS from "mdns";
 import config from "mc/config";
 
@@ -24,17 +23,17 @@ const LIGHTBLUE = "#bac0e5";
 const RED = "#ff2600";
 const GREEN = "#7CFC00";
 
-const backgroundSkin = new Skin({ fill: GRAY });
-const itemsSkin = new Skin({ fill: WHITE });
-const itemsStyle = new Style({ color: GRAY });
-const noMoreItemsStyle = new Style({ color: GREEN});
-const activeMeetingSkin = new Skin({ fill: RED });
-const buttonContainerSkin = new Skin({ fill: GRAY });
-const buttonSkin = new Skin({ fill: BLUE });
-const buttonPressedSkin = new Skin({ fill: LIGHTBLUE });
-const buttonsStyle = new Style({ color: WHITE });
+const backgroundSkin = new Skin({fill: GRAY});
+const itemsSkin = new Skin({fill: WHITE});
+const itemsStyle = new Style({color: GRAY});
+const noMoreItemsStyle = new Style({color: GREEN});
+const activeMeetingSkin = new Skin({fill: RED});
+const buttonContainerSkin = new Skin({fill: GRAY});
+const buttonSkin = new Skin({fill: BLUE});
+const buttonPressedSkin = new Skin({fill: LIGHTBLUE});
+const buttonsStyle = new Style({color: WHITE});
 
-const OpenSans20 = new Style({ font: "20px Open Sans" });
+const OpenSans20 = new Style({font: "20px Open Sans"});
 
 const ListItem = Label.template($ => ({
   skin: itemsSkin, style: itemsStyle, string: $
@@ -48,21 +47,19 @@ function safeBacklight(brightness) {
 }
 
 class VerticalScrollerBehavior extends Behavior {
-  onCreate(content, data) {
-    this.data = data;
-    this.transitioningIn = 1;
-  }
   onTouchBegan(scroller, id, x, y) {
     safeBacklight(100);
     this.anchor = scroller.scroll.y;
     this.y = y;
     this.waiting = true;
   }
+
   onTouchMoved(scroller, id, x, y, ticks) {
     let delta = y - this.y;
     if (this.waiting) {
-      if (Math.abs(delta) < 8)
+      if (Math.abs(delta) < 8) {
         return;
+      }
       this.waiting = false;
       scroller.captureTouch(id, x, y, ticks);
     }
@@ -70,25 +67,26 @@ class VerticalScrollerBehavior extends Behavior {
   }
 }
 
-const VerticalScrollingContent = Scroller.template($ =>({
+const VerticalScrollingContent = Scroller.template($ => ({
   anchor: "SCROLLER", left: 0, right: 0, top: 0, bottom: 0,
   skin: backgroundSkin, active: true, clip: true, loop: true,
-  contents:  [
+  contents: [
     Column($, {
       anchor: "SCROLLER_COLUMN", top: 0, left: 0, right: 0,
       Behavior: class extends Behavior {
         onCreate(application, data) {
           this.data = data || {};
         }
+
         onUpdateSchedule(column, schedule) {
-          const days = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+          const days = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
           this.data.schedule = schedule;
 
           let meetingsPresent = false;
           //get current time
           let now = new Date();
           column.empty();
-          const columnItemOptions = { top: 20, height: 50, left: 5, right: 5};
+          const columnItemOptions = {top: 20, height: 50, left: 5, right: 5};
 
           for (let i = 0; i < schedule.length; i++) {
             const meeting = schedule[i];
@@ -98,7 +96,7 @@ const VerticalScrollingContent = Scroller.template($ =>({
             }
 
             meetingsPresent = true;
-            const itemOptions = { ...columnItemOptions };
+            const itemOptions = {...columnItemOptions};
             if (isMeetingActive(now, meeting)) {
               itemOptions.skin = activeMeetingSkin;
             }
@@ -115,6 +113,7 @@ const VerticalScrollingContent = Scroller.template($ =>({
           column.time = 0;
           column.start();
         }
+
         onFinished(column) {
           this.onUpdateSchedule(column, this.data.schedule);
         }
@@ -136,7 +135,7 @@ function timeFormat(d) {
     min = "0" + min;
   }
   let ampm = "am";
-  if( hr > 12 ) {
+  if (hr > 12) {
     hr -= 12;
     ampm = "pm";
   } else if (hr === 12) {
@@ -153,9 +152,10 @@ class MessageButtonBehavior extends Behavior {
   onTouchBegan(label) {
     label.skin = buttonPressedSkin;
   }
+
   onTouchEnded(label) {
     label.skin = buttonSkin;
-    application.delegate("addMessage",label.string);
+    application.delegate("sendMessage", label.string);
   }
 }
 
@@ -168,14 +168,14 @@ class MeetingAppBehavior extends Behavior {
   onCreate(application, data) {
     this.data = data;
     this.data.previousMeetingData = '';
-    this.messages = [];
+    this.webSocketServer = null;
     application.duration = 1000 * 60 * 5; // 5 min
-    this.configureServer(application);
+    this.configureWebSocket(application);
   }
 
   onDisplaying(application) {
     if (!(application.height === 240 && application.width === 320 ||
-          application.height === 320 && application.width === 240))
+            application.height === 320 && application.width === 240))
       trace("WARNING: This application was designed to run on a 240x320 screen.\n");
     this.setBacklight();
   }
@@ -219,55 +219,49 @@ class MeetingAppBehavior extends Behavior {
     application.start();
   }
 
-  addMessage(application, message) {
-    //no nagging, just one ;)
-    if (this.messages.indexOf(message) === -1) {
-      this.messages.push(message);
-    }
-  }
-
-  configureServer(application) {
+  configureWebSocket(application) {
     const self = this;
-    this.server = new Server();
-    this.server.owner = this;
-    this.server.callback = function(message, value, v2) {
+    let server = new Server({port: 80});
+    server.callback = function(message, value) {
       switch (message) {
-        case Server.status:
-          this.path = value;
+        case Server.connect:
+          trace("main.js: socket connect.\n");
+          //keep an external pointer to the most recent connection
+          self.webSocketServer = this;
           break;
 
-        case Server.headersComplete:		// request headers received, prepare for request body
-          return String;
-
-        case Server.requestComplete:		// request body received
-          if (this.path === "/meetings") {
-            self.processMeetingData(application, value);
-            trace(`received JSON: ${value}\n`);
-
-            application.time = 0;
-            application.start();
-          }
+        case Server.handshake:
+          trace("main.js: websocket handshake success\n");
           break;
 
-        case Server.prepareResponse:
-          if (this.path === "/meetings") {
-            const body = JSON.stringify(self.messages);
-            self.messages = [];
-            return {
-              headers: ["Content-type", "application/json"],
-              body
-            };
-          }
+        case Server.receive:
+          self.processMeetingData(application, value);
+          trace(`received JSON: ${value}\n`);
+
+          application.time = 0;
+          application.start();
+          break;
+
+        case Server.disconnect:
+          trace("main.js: websocket close\n");
           break;
       }
     };
-    trace(`http server ready at ${Net.get("IP")}\n`);
+
     this.advertiseServer();
   }
 
+  //sends a notification request to the websocket client
+  sendMessage(application, message) {
+    if (this.webSocketServer !== null) {
+      this.webSocketServer.write(message);
+    }
+  };
+
   //use mDns to assign a URL name for local network access, like http://meetings.local
   advertiseServer() {
-    this.mdns = new MDNS({hostName: config.mdnsDomainName}, function(message, value) {});
+    this.mdns = new MDNS({hostName: config.mdnsDomainName}, function(message, value) {
+    });
     this.mdns[config.mdnsDomainName] = this;
   }
 }
@@ -283,7 +277,7 @@ const MeetingApplication = Application.template($ => ({
         Row($, {
           top: 0, height: 50, left: 0, right: 0, skin: buttonContainerSkin,
           contents: config.buttonLabels.map(label => {
-            return new MessageButton({ string: label });
+            return new MessageButton({string: label});
           })
         }),
       ]
@@ -292,5 +286,5 @@ const MeetingApplication = Application.template($ => ({
   Behavior: MeetingAppBehavior
 }));
 
-export default new MeetingApplication({}, { displayListLength:4096, touchCount:1 });
+export default new MeetingApplication({}, {displayListLength: 4096, touchCount: 1});
 

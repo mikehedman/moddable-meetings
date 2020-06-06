@@ -1,7 +1,7 @@
 chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
       //listening for request from popup's "Refresh" button
-      if (request.command == "getMeetings") {
+      if (request.command === "getMeetings") {
         getMeetings();
         sendResponse({status: "sent"});
       }
@@ -11,8 +11,8 @@ chrome.runtime.onMessage.addListener(
 //let the page load for 10 seconds, then collect data
 setTimeout(() => {
   getMeetings();
-  //refresh every 15 seconds. This frequency is primarily so we can also fetch for messages from the remote device
-  setInterval(getMeetings, 1000 * 15);
+  //refresh every 10 minutes.
+  setInterval(getMeetings, 1000 * 60 * 10);
 }, 10000);
 
 //note, this function can also be called from a message sent by the extension popup

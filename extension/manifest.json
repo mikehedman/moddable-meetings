@@ -1,22 +1,27 @@
 {
   "name": "Meeting collecter",
-  "version": "1.0",
+  "version": "1.1",
   "description": "Collects meetings from Outlook calendar",
   "permissions": [
     "tabs",
-    "http://meetings.local/*",
     "declarativeContent",
     "notifications"
   ],
   "content_scripts": [
     {
-      "matches": ["https://outlook.office.com/calendar/*"],
-      "js": ["meetings.js"],
+      "matches": [
+        "https://outlook.office.com/calendar/*"
+      ],
+      "js": [
+        "meetings.js"
+      ],
       "run_at": "document_start"
     }
   ],
-  "background":{
-    "scripts":["background.js"],
+  "background": {
+    "scripts": [
+      "background.js"
+    ],
     "persistent": true
   },
   "page_action": {
