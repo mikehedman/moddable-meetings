@@ -171,6 +171,7 @@ class MeetingAppBehavior extends Behavior {
     this.webSocketServer = null;
     application.duration = 1000 * 60 * 5; // 5 min
     this.configureWebSocket(application);
+    this.advertiseServer();
   }
 
   onDisplaying(application) {
@@ -236,8 +237,7 @@ class MeetingAppBehavior extends Behavior {
 
         case Server.receive:
           self.processMeetingData(application, value);
-          // commenting this out, as it's throwing "XS abort: memory full" errors
-          // trace("received JSON: " + value + "\n");
+          trace("received JSON: " + value + "\n");
 
           application.time = 0;
           application.start();
@@ -248,8 +248,6 @@ class MeetingAppBehavior extends Behavior {
           break;
       }
     };
-
-    this.advertiseServer();
   }
 
   //sends a notification request to the websocket client
