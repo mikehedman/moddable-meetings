@@ -237,7 +237,7 @@ class MeetingAppBehavior extends Behavior {
 
         case Server.receive:
           self.processMeetingData(application, value);
-          trace("received JSON: " + value + "\n");
+          trace("received JSON: ", value, "\n");
 
           application.time = 0;
           application.start();

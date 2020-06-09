@@ -6,6 +6,7 @@
     "$(MODULES)/network/mdns/manifest.json"
   ],
   "creation": {
+    "static": 65536,
     "stack": 512
   },
   "modules": {
